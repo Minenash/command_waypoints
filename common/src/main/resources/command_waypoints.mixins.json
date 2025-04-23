@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.minenash.command_waypoints.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "client": [
+  ],
+  "mixins": [
+    "WaypointCommandMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
