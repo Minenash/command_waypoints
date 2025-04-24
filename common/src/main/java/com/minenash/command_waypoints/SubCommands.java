@@ -36,8 +36,6 @@ import static net.minecraft.commands.arguments.coordinates.BlockPosArgument.getB
 
 public class SubCommands {
 
-    private static final DynamicCommandExceptionType NO_WAYPOINT_EXCEPTION = new DynamicCommandExceptionType(id -> Component.literal("No Waypoint with ID " + id));
-
     public static final SuggestionProvider<CommandSourceStack> SUGGEST_STATIC_IDS = (ctx, builder) ->
         SharedSuggestionProvider.suggestResource(points(ctx).keySet(), builder);
 
@@ -135,8 +133,10 @@ public class SubCommands {
         var id = getId(ctx, "id");
 
         var point = points(ctx).get(id);
-        if (point != null)
-            manager.untrackWaypoint(point);
+        if (point != null) {
+            ctx.getSource().sendFailure(Component.translatable("commands.waypoint.static.add.already_exists", id.toString()));
+            return 0;
+        }
 
         var icon = new Waypoint.Icon();
         if (color != null)
@@ -152,51 +152,64 @@ public class SubCommands {
         CommandWaypoints.waypoints.put(ctx.getSource().getLevel(), points);
 
         save(ctx);
+        ctx.getSource().sendSuccess(() -> Component.translatable("commands.waypoint.static.add.success"), false);
         return 1;
     }
 
-    public static int modifyWayPointPos(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    public static int modifyWayPointPos(CommandContext<CommandSourceStack> ctx) {
         var point = point(ctx);
+        if (point == null)
+            return 0;
         point.pos = getBlockPos(ctx, "location");
         updateWaypoint(ctx, point);
         return 1;
     }
-    public static int modifyWayPointColor(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    public static int modifyWayPointColor(CommandContext<CommandSourceStack> ctx) {
         var point = point(ctx);
+        if (point == null)
+            return 0;
         point.icon.color = Optional.ofNullable(getColor(ctx, "color").getColor());
         updateWaypoint(ctx, point);
         return 1;
     }
-    public static int modifyWayPointHexColor(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    public static int modifyWayPointHexColor(CommandContext<CommandSourceStack> ctx) {
         var point = point(ctx);
+        if (point == null)
+            return 0;
         point.icon.color = Optional.of(getHexColor(ctx, "color"));
         updateWaypoint(ctx, point);
         return 1;
     }
-    public static int modifyWayPointRange(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    public static int modifyWayPointRange(CommandContext<CommandSourceStack> ctx) {
         var point = point(ctx);
+        if (point == null)
+            return 0;
         point.range = getInteger(ctx, "range");
         updateWaypoint(ctx, point);
         return 1;
     }
-    public static int modifyWayPointResetStyle(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    public static int modifyWayPointResetStyle(CommandContext<CommandSourceStack> ctx) {
         var point = point(ctx);
+        if (point == null)
+            return 0;
         point.icon.style = WaypointStyleAssets.DEFAULT;
         updateWaypoint(ctx, point);
         return 1;
     }
-    public static int modifyWayPointStyle(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    public static int modifyWayPointStyle(CommandContext<CommandSourceStack> ctx) {
         var point = point(ctx);
+        if (point == null)
+            return 0;
         point.icon.style = ResourceKey.create(WaypointStyleAssets.ROOT_ID, getId(ctx, "style"));
         updateWaypoint(ctx, point);
         return 1;
     }
 
-    private static CommandWaypoint point(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    private static CommandWaypoint point(CommandContext<CommandSourceStack> ctx) {
         var id = getId(ctx, "id");
         var point = points(ctx).get(id);
         if (point == null)
-            throw NO_WAYPOINT_EXCEPTION.create(id);
+            ctx.getSource().sendFailure(Component.translatable("commands.waypoint.static.doesnt_exist", id.toString()));
         return point;
     }
     private static void updateWaypoint(CommandContext<CommandSourceStack> ctx, CommandWaypoint waypoint) {
@@ -204,6 +217,7 @@ public class SubCommands {
         manager.untrackWaypoint(waypoint);
         manager.trackWaypoint(waypoint);
         save(ctx);
+        ctx.getSource().sendSuccess(() -> Component.translatable("commands.waypoint.static.modify.success"), false);
     }
 
 
@@ -211,11 +225,17 @@ public class SubCommands {
         var manager = ctx.getSource().getLevel().getWaypointManager();
         var id = getId(ctx, "id");
 
-        var point = points(ctx).get(id);
-        if (point != null)
-            manager.untrackWaypoint(point);
+        var points = points(ctx);
+        var point = points.get(id);
+        if (point == null)
+            return 0;
+
+        manager.untrackWaypoint(point);
+        points.remove(id);
+        CommandWaypoints.waypoints.put(ctx.getSource().getLevel(), points);
 
         save(ctx);
+        ctx.getSource().sendSuccess(() -> Component.translatable("commands.waypoint.static.remove.success"), false);
         return 1;
     }
 
