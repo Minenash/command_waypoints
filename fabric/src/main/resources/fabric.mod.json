@@ -3,12 +3,21 @@
   "id": "command_waypoints",
   "version": "${version}",
   "name": "Command Waypoints",
-  "description": "Allows you to create waypoints using a command without any entities",
+  "description": "Allows you to create waypoints for the new Locator Bar feature via commands without the need of any entities",
   "authors": [
     "Jakob (Minenash)"
   ],
   "contact": {
-    "homepage": ""
+    "homepage": "https://modrinth.com/project/command-waypoints",
+    "sources": "https://github.com/Minenash/command_waypoints",
+    "issues": "https://github.com/Minenash/command_waypoints/issues"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/VZdzvrDpmx"
+      }
+    }
   },
   "license": "LGPL-3.0",
   "icon": "assets/command_waypoints/icon.png",
@@ -22,12 +31,7 @@
     "command_waypoints.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.16.13",
-    "minecraft": "~1.21.5",
-    "java": ">=21",
+    "minecraft": ">1.21.5",
     "fabric-api": "*"
-  },
-  "suggests": {
-    "another-mod": "*"
   }
 }
