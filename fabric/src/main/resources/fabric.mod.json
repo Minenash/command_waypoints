@@ -15,7 +15,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.minenash.command_waypoints.fabric.Command_waypointsFabric"
+      "com.minenash.command_waypoints.fabric.CommandWaypointsFabric"
     ]
   },
   "mixins": [

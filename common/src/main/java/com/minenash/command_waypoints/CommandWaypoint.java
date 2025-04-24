@@ -1,7 +1,11 @@
 package com.minenash.command_waypoints;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.protocol.game.ClientboundTrackedWaypointPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.waypoints.Waypoint;
@@ -12,16 +16,39 @@ import java.util.UUID;
 
 public class CommandWaypoint implements WaypointTransmitter {
 
-    private final UUID uuid;
+    public static final Codec<CommandWaypoint> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
+        UUIDUtil.CODEC.fieldOf("uuid").forGetter(CommandWaypoint::uuid),
+        ResourceLocation.CODEC.fieldOf("id").forGetter(CommandWaypoint::id),
+        BlockPos.CODEC.fieldOf("pos").forGetter(CommandWaypoint::pos),
+        Icon.CODEC.fieldOf("icon").forGetter(CommandWaypoint::icon),
+        Codec.INT.fieldOf("range").forGetter(CommandWaypoint::range)
+    ).apply(instance, CommandWaypoint::new));
+
+    public final UUID uuid;
+    public final ResourceLocation id;
     public BlockPos pos;
     public Waypoint.Icon icon;
     public int range;
 
-    public CommandWaypoint(UUID uuid, BlockPos pos, Waypoint.Icon icon, int range) {
+    public UUID uuid() { return uuid; }
+    public ResourceLocation id() { return id; }
+    public BlockPos pos() { return pos; }
+    public Waypoint.Icon icon() { return icon; }
+    public int range() { return range; }
+
+
+
+    public CommandWaypoint(UUID uuid, ResourceLocation id, BlockPos pos, Waypoint.Icon icon, int range) {
         this.uuid = uuid;
+        this.id = id;
         this.pos = pos;
         this.icon = icon;
         this.range = range;
+    }
+
+    @Override
+    public String toString() {
+        return id + "[" +  pos.getX() + " " + pos.getY() + " " + pos.getZ() + "]";
     }
 
     @Override

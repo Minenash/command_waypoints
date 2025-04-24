@@ -15,10 +15,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.waypoints.Waypoint;
 import net.minecraft.world.waypoints.WaypointStyleAssets;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.minenash.command_waypoints.CommandWaypoints.waypoints;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static java.lang.Math.floor;
@@ -38,7 +39,7 @@ public class SubCommands {
     private static final DynamicCommandExceptionType NO_WAYPOINT_EXCEPTION = new DynamicCommandExceptionType(id -> Component.literal("No Waypoint with ID " + id));
 
     public static final SuggestionProvider<CommandSourceStack> SUGGEST_STATIC_IDS = (ctx, builder) ->
-        SharedSuggestionProvider.suggestResource(waypoints.keySet(), builder);
+        SharedSuggestionProvider.suggestResource(points(ctx).keySet(), builder);
 
     public static LiteralArgumentBuilder<CommandSourceStack> addSubCommands(LiteralArgumentBuilder<CommandSourceStack> original) {
 
@@ -133,7 +134,7 @@ public class SubCommands {
         var manager = ctx.getSource().getLevel().getWaypointManager();
         var id = getId(ctx, "id");
 
-        var point = waypoints.get(id);
+        var point = points(ctx).get(id);
         if (point != null)
             manager.untrackWaypoint(point);
 
@@ -143,9 +144,14 @@ public class SubCommands {
         if (style != null)
             icon.style = ResourceKey.create(WaypointStyleAssets.ROOT_ID, style);
 
-        point = new CommandWaypoint(UUID.randomUUID(), pos, icon, range);
-        waypoints.put(id, point);
+        point = new CommandWaypoint(UUID.randomUUID(), id, pos, icon, range);
         manager.trackWaypoint(point);
+
+        var points = points(ctx);
+        points.put(id, point);
+        CommandWaypoints.waypoints.put(ctx.getSource().getLevel(), points);
+
+        save(ctx);
         return 1;
     }
 
@@ -188,7 +194,7 @@ public class SubCommands {
 
     private static CommandWaypoint point(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         var id = getId(ctx, "id");
-        var point = waypoints.get(id);
+        var point = points(ctx).get(id);
         if (point == null)
             throw NO_WAYPOINT_EXCEPTION.create(id);
         return point;
@@ -197,6 +203,7 @@ public class SubCommands {
         var manager = ctx.getSource().getLevel().getWaypointManager();
         manager.untrackWaypoint(waypoint);
         manager.trackWaypoint(waypoint);
+        save(ctx);
     }
 
 
@@ -204,10 +211,19 @@ public class SubCommands {
         var manager = ctx.getSource().getLevel().getWaypointManager();
         var id = getId(ctx, "id");
 
-        var point = waypoints.get(id);
+        var point = points(ctx).get(id);
         if (point != null)
             manager.untrackWaypoint(point);
 
+        save(ctx);
         return 1;
+    }
+
+    public static void save(CommandContext<CommandSourceStack> ctx) {
+        CommandWaypoints.saveWaypoints.accept(ctx.getSource().getLevel());
+    }
+
+    public static Map<ResourceLocation,CommandWaypoint> points(CommandContext<CommandSourceStack> ctx) {
+        return CommandWaypoints.waypoints.getOrDefault(ctx.getSource().getLevel(), new HashMap<>());
     }
 }
