@@ -1,5 +1,5 @@
-<center>
-  <img src="https://cdn.modrinth.com/data/cached_images/efac58e3820179642c8a548e0d264650c955b0de.png">
+<div align="center">
+<img src="https://cdn.modrinth.com/data/cached_images/efac58e3820179642c8a548e0d264650c955b0de.png">
 <br><br><br>
 
 In 25w15a, Mojang released the Locator Bar, which can show waypoints. Currently, only entities can be waypoints with players showing by default.
@@ -7,8 +7,8 @@ In 25w15a, Mojang released the Locator Bar, which can show waypoints. Currently,
 This mod extends the `/waypoint` command to allow adding/modifying/removing of "static" waypoints.
 
 <br>
-  <img src="https://cdn.modrinth.com/data/cached_images/efac58e3820179642c8a548e0d264650c955b0de.png">
-</center>
+<img src="https://cdn.modrinth.com/data/cached_images/efac58e3820179642c8a548e0d264650c955b0de.png">
+</div>
 <br><br>
 
 ### Commands
